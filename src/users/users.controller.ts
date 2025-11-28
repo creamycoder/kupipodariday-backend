@@ -1,5 +1,16 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
@@ -9,11 +20,32 @@ export class UsersController {
 
     @Get()
     findAll(): Promise<User[]> {
-        return this.usersService.findAll();
+        return this.usersService.findMany();
     }
 
     @Post()
-    create(@Body() student: CreateUserDto) {
-        return this.usersService.create(student);
+    create(@Body() user: CreateUserDto) {
+        return this.usersService.create(user);
+    }
+
+    @Patch(':id')
+    async updateById(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() updateUserDto: UpdateUserDto,
+    ) {
+        const user = await this.usersService.findOne(id);
+        if (!user) {
+            throw new NotFoundException();
+        }
+        return this.usersService.updateOne(id, updateUserDto);
+    }
+
+    @Delete(':id')
+    async removeById(@Param('id', ParseIntPipe) id: number) {
+        const user = await this.usersService.findOne(id);
+        if (!user) {
+            throw new NotFoundException();
+        }
+        await this.usersService.removeOne(id);
     }
 }
