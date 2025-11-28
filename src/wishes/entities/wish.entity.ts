@@ -1,10 +1,13 @@
-import { IsDataURI, Length } from 'class-validator';
+import { IsUrl, Length } from 'class-validator';
+import { Offer } from 'src/offers/entities/offer.entity';
+import { User } from 'src/users/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   Column,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -28,7 +31,7 @@ export class Wish {
   link: string;
 
   @Column()
-  @IsDataURI()
+  @IsUrl()
   image: string;
 
   @Column({
@@ -44,14 +47,22 @@ export class Wish {
   raised: number;
 
   @Column({
+    type: 'numeric',
+    scale: 0,
+  })
+  copied: number;
+
+  @ManyToOne(() => User, (user) => user.wishes)
+  owner: User;
+
+  @Column({
     type: 'varchar',
   })
   @Length(1, 1024)
   description: string;
 
-  @Column({
-    type: 'numeric',
-    scale: 0,
-  })
-  copied: number;
+  @ManyToOne(() => Offer, (offer) => offer.item)
+  offers: Offer[];
+
+
 }
