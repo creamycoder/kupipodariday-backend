@@ -8,12 +8,15 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
+@UseGuards(JwtGuard)
 @Controller('users')
 export class UsersController {
     constructor(private usersService: UsersService) {}
@@ -33,7 +36,7 @@ export class UsersController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateUserDto: UpdateUserDto,
     ) {
-        const user = await this.usersService.findOne(id);
+        const user = await this.usersService.findOne({ where: { id } });
         if (!user) {
             throw new NotFoundException();
         }
@@ -42,7 +45,7 @@ export class UsersController {
 
     @Delete(':id')
     async removeById(@Param('id', ParseIntPipe) id: number) {
-        const user = await this.usersService.findOne(id);
+        const user = await this.usersService.findOne({ where: { id } });
         if (!user) {
             throw new NotFoundException();
         }

@@ -7,7 +7,6 @@ import {
   UpdateDateColumn,
   Column,
   ManyToOne,
-  OneToMany,
 } from 'typeorm';
 
 @Entity()
