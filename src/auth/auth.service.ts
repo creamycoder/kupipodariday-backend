@@ -20,9 +20,13 @@ export class AuthService {
   async validatePassword(username: string, password: string) {
     const userPassword = password;
     const user = await this.usersService.findByUsername(username);
-    const hash = await this.hashService.hash(password);
-    if (user && user.password) {
-        const isValidHash = await this.hashService.verifyHash(password, hash);
+    
+    if (user) {
+        const isValidHash = await this.hashService.verifyHash(
+            userPassword,
+            user.password,
+        );
+
         return isValidHash ? user : null;
     }
     return null;

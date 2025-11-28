@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -14,8 +15,8 @@ import {
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RequestWithUser } from 'src/types/types';
 import { CreateUserDto } from './dto/create-user.dto';
+import { FindUsersDto } from './dto/find-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
 @UseGuards(JwtGuard)
@@ -23,14 +24,32 @@ import { UsersService } from './users.service';
 export class UsersController {
     constructor(private usersService: UsersService) {}
 
-    @Get()
-    findAll(): Promise<User[]> {
-        return this.usersService.findMany();
-    }
-
     @Get('me')
     getUser(@Req() req: RequestWithUser) {
         return req.user;
+    }
+
+    @Get(':username')
+    async getUserByName(@Param('username') username: string) {
+        const user = await this.usersService.findByUsername(username);
+        if (!user) {
+            throw new NotFoundException();
+        }
+        delete user.password;
+        delete user.email;
+        return user;
+    }
+
+    @Post('find')
+    @Header('Content-Type', 'application/json')
+    async findUserByEmailOrUserName(@Body() findUserDto: FindUsersDto) {
+        const { query } = findUserDto;
+        const user = await this.usersService.findMany(query);
+        if (!user) {
+            return;
+        }
+        delete user[0].password;
+        return user;
     }
 
     @Post()
@@ -46,12 +65,12 @@ export class UsersController {
         return this.usersService.updateOne(req.user.id, updateUserDto);
     }
 
-    @Delete(':id')
+    /*@Delete(':id')
     async removeById(@Param('id', ParseIntPipe) id: number) {
         const user = await this.usersService.findOne({ where: { id } });
         if (!user) {
             throw new NotFoundException();
         }
         await this.usersService.removeOne(id);
-    }
+    }*/
 }

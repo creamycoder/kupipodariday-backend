@@ -3,8 +3,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
-  Length,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -15,16 +15,25 @@ export class CreateUserDto {
   password: string;
 
   @IsString()
-  @Length(2, 30)
+  @MinLength(2, {
+    message: 'Имя пользователя не может быть короче 2-х символов'
+  })
+  @MaxLength(30, {
+    message: 'Имя пользователя не может быть длиннее 30 символов'
+  })
   username: string;
 
   @IsString()
   @IsOptional()
-  @IsUrl()
   avatar?: 'https://i.pravatar.cc/150?img=3';
 
   @IsString()
-  @Length(2, 200)
+  @MinLength(2, {
+    message: 'Описание профиля не может быть короче 2-х символов'
+  })
+  @MaxLength(200, {
+    message: 'Описание профиля не может быть длиннее 200 символов'
+  })
   @IsOptional()
   about?: string;
 }

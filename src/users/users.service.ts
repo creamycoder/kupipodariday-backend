@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, ConflictException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./entities/user.entity";
 import { FindOneOptions, Repository } from 'typeorm';
@@ -15,11 +15,24 @@ export class UsersService {
     ) {}
 
     async create(createUserDto: CreateUserDto): Promise<User> {
+        const { email, username } = createUserDto;
+
+        const existUser = await this.usersRepository.find({
+            where: [{ email: email }, { username: username }],
+        });
+
+        if (existUser.length !== 0) {
+            throw new ConflictException(
+                'Пользователь с таким email или username уже зарегистрирован',
+            );
+        }
+
         const hash = await this.hashServise.hash(createUserDto.password);
         const newUser = this.usersRepository.create({
             ...createUserDto,
             password: hash,
         });
+        
         return this.usersRepository.save(newUser);
     }
 
@@ -27,17 +40,14 @@ export class UsersService {
         return this.usersRepository.findOne(query);
     }
 
-    async findMany(): Promise<User[]> {
-        return this.usersRepository.find();
+    findMany(query: string) {
+        return this.usersRepository.find({
+            where: [{ email: query }, { username: query }],
+        });
     }
 
     async findByUsername(username: string) {
         const user = await this.usersRepository.findOne({ where: { username } });
-        return user;
-    }
-
-    async findByEmail(email: string) {
-        const user = await this.usersRepository.findOne({ where: { email } });
         return user;
     }
 
