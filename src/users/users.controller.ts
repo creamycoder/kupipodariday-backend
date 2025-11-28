@@ -9,8 +9,10 @@ import {
   Patch,
   Post,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RequestWithUser } from 'src/types/types';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -26,21 +28,22 @@ export class UsersController {
         return this.usersService.findMany();
     }
 
-    @Post()
-    create(@Body() user: CreateUserDto) {
-        return this.usersService.create(user);
+    @Get('me')
+    getUser(@Req() req: RequestWithUser) {
+        return req.user;
     }
 
-    @Patch(':id')
-    async updateById(
-        @Param('id', ParseIntPipe) id: number,
+    @Post()
+    create(@Body() createUserDto: CreateUserDto) {
+        return this.usersService.create(createUserDto);
+    }
+
+    @Patch('me')
+    async updateUser(
         @Body() updateUserDto: UpdateUserDto,
+        @Req() req: RequestWithUser,
     ) {
-        const user = await this.usersService.findOne({ where: { id } });
-        if (!user) {
-            throw new NotFoundException();
-        }
-        return this.usersService.updateOne(id, updateUserDto);
+        return this.usersService.updateOne(req.user.id, updateUserDto);
     }
 
     @Delete(':id')
