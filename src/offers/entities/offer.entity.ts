@@ -21,10 +21,10 @@ export class Offer {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @ManyToOne(() => User, (user) => user.id)
+    @ManyToOne(() => User, (user) => user.offers)
     user: User;
 
-    @OneToMany(() => Wish, (wish) => wish.offers)
+    @ManyToOne(() => Wish, (wish) => wish.offers)
     item: Wish;
 
     @Column({

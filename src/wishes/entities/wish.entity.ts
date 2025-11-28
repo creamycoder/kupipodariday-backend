@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   Column,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -61,7 +62,7 @@ export class Wish {
   @Length(1, 1024)
   description: string;
 
-  @ManyToOne(() => Offer, (offer) => offer.item)
+  @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[];
 
 
