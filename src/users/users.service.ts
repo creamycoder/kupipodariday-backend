@@ -57,7 +57,15 @@ export class UsersService {
                 updateUserDto.password,
             );
         }
-        return this.usersRepository.update({ id }, updateUserDto);
+        await this.usersRepository.update({ id }, updateUserDto);
+
+        const updatedUser = await this.findOne({
+            where: { id: +id },
+        });
+
+        delete updatedUser.password;
+
+        return updatedUser;
     }
 
     async getUserWishes(id: number) {

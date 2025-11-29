@@ -1,4 +1,50 @@
-import { Controller } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { Header, Patch } from '@nestjs/common/decorators';
+import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RequestWithUser } from 'src/types/types';
+import { CreateWishListDto } from './dto/create-wishList.dto';
+import { UpdateWishListDto } from './dto/update-wishList.dto';
+import { WishlistsService } from './wishlists.service';
 
-@Controller('wishlists')
-export class WishlistsController {}
+@Controller('wishlistlists')
+export class WishlistsController {
+  constructor(private wishlistsService: WishlistsService) {}
+
+  @Get()
+  getWishlists() {
+    return this.wishlistsService.getWishlists();
+  }
+
+  @UseGuards(JwtGuard)
+  @Get(':id')
+  getWishlistsById(@Param('id') id: string) {
+    return this.wishlistsService.getWishlistsById(id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post()
+  create(
+    @Body() createWishListDto: CreateWishListDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.wishlistsService.create(req.user, createWishListDto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch(':id')
+  @Header('Content-Type', 'application/json')
+  async updateWishlistlists(
+    @Body() updateWishListDto: UpdateWishListDto,
+    @Param('id') id: string,
+  ) {
+    return this.wishlistsService.updateOne(updateWishListDto, id);
+  }
+}
