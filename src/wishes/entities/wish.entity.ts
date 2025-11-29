@@ -42,14 +42,14 @@ export class Wish {
   price: number;
 
   @Column({
-    type: 'numeric',
     scale: 2,
+    default: 0,
   })
   raised: number;
 
   @Column({
-    type: 'numeric',
     scale: 0,
+    default: 0,
   })
   copied: number;
 
