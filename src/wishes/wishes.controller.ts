@@ -16,17 +16,36 @@ import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { WishesService } from './wishes.service';
 
+@UseGuards(JwtGuard)
 @Controller('wishes')
 export class WishesController {
   constructor(private wishesService: WishesService) {}
 
-  @UseGuards(JwtGuard)
+  @Get('last')
+  getLastWishes() {
+    return this.wishesService.findLast();
+  }
+
+  @Get('top')
+  getTopWishes() {
+    return this.wishesService.findTopWishes();
+  }
+
+  @Get(':id')
+  getWishById(@Param('id') id: number) {
+    return this.wishesService.getWishById(id);
+  }
+
   @Post()
   create(@Body() createWishDto: CreateWishDto, @Req() req: RequestWithUser) {
     return this.wishesService.create(req.user, createWishDto);
   }
 
-  @UseGuards(JwtGuard)
+  @Post(':id/copy')
+  copy(@Param('id') id: number, @Req() req: RequestWithUser) {
+    return this.wishesService.copy(req.user, id);
+  }
+  
   @Patch(':id')
   async updateWishlistlists(
     @Body() updateWishDto: UpdateWishDto,
@@ -35,13 +54,6 @@ export class WishesController {
     return this.wishesService.updateOne(updateWishDto, id);
   }
 
-  @UseGuards(JwtGuard)
-  @Get(':id')
-  getWishById(@Param('id') id: number) {
-    return this.wishesService.getWishById(id);
-  }
-
-  @UseGuards(JwtGuard)
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
     return this.wishesService.delete(id);
