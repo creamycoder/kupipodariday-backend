@@ -4,7 +4,7 @@ export class CreateOfferDto {
   @Min(1)
   amount: number;
 
-  hidden: boolean;
+  hidden?: boolean;
 
   itemId: number;
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
@@ -31,7 +35,25 @@ export class WishesService {
     return this.wishesRepository.findOne(query);
   }
 
-  async updateOne(updateWishDto: UpdateWishDto, id: string) {
+  async updateOne(updateWishDto: UpdateWishDto, id: string, userId: number) {
+    const wish = await this.wishesRepository.findOne({
+      where: [{ id: +id }],
+      relations: {
+        owner: true,
+        offers: true,
+      },
+    });
+
+    if (wish.offers.length !== 0 && wish.raised !== 0) {
+      throw new ForbiddenException(
+        'Редактирование подарка невозможжно, если есть желающие скинуться',
+      );
+    }
+
+    if (userId !== wish.owner.id) {
+      throw new ForbiddenException('Редактирование чужих подарков невозможно');
+    }
+
     await this.wishesRepository.update(id, updateWishDto);
   }
 
@@ -46,9 +68,20 @@ export class WishesService {
         },
       },
     });
+
     if (!wish) {
       throw new NotFoundException();
     }
+
+    const amounts = wish.offers.map((offer) => Number(offer.amount));
+
+    wish.raised = amounts.reduce(function (acc, val) {
+      return acc + val;
+    }, 0);
+
+    delete wish.owner.password;
+    delete wish.owner.email;
+
     return wish;
   }
 
@@ -56,7 +89,7 @@ export class WishesService {
     return this.wishesRepository.delete({ id });
   }
 
-  async delete(id: number) {
+  async delete(id: number, userId: number) {
     const wish = await this.findOne({
       where: { id: id },
       relations: {
@@ -70,7 +103,13 @@ export class WishesService {
     if (!wish) {
       throw new NotFoundException();
     }
+
+    if (userId !== wish.owner.id) {
+      throw new ForbiddenException('Удаление чужих подарков невозможно');
+    }
     await this.removeById(id);
+    delete wish.owner.password;
+    delete wish.owner.email;
     return wish;
   }
 
@@ -80,7 +119,6 @@ export class WishesService {
         owner: true,
         offers: {
           item: true,
-          user: { offers: true, wishes: true, wishlists: true },
         },
       },
       order: {
@@ -88,9 +126,20 @@ export class WishesService {
       },
       take: 40,
     });
+
+    wishes.forEach((wish) => {
+      const amounts = wish.offers.map((offer) => Number(offer.amount));
+
+      wish.raised = amounts.reduce(function (acc, val) {
+        return acc + val;
+      }, 0);
+
+      delete wish.owner.password;
+      delete wish.owner.email;
+    });
+
     return wishes;
   }
-
 
   async findTopWishes() {
     const wishes = await this.wishesRepository.find({
@@ -98,7 +147,6 @@ export class WishesService {
         owner: true,
         offers: {
           item: true,
-          user: { offers: true, wishes: true, wishlists: true },
         },
       },
       order: {
@@ -106,12 +154,34 @@ export class WishesService {
       },
       take: 20,
     });
-    return wishes;
+
+    const copiedWishes = wishes.filter((wish) => {
+      if (wish.copied === 0) {
+        return;
+      }
+      return wish;
+    });
+
+    copiedWishes.forEach((wish) => {
+      const amounts = wish.offers.map((offer) => Number(offer.amount));
+
+      wish.raised = amounts.reduce(function (acc, val) {
+        return acc + val;
+      }, 0);
+
+      delete wish.owner.password;
+      delete wish.owner.email;
+    });
+
+    return copiedWishes;
   }
 
   async copy(owner: User, wishId: number) {
     const wish = await this.findOne({
       where: { id: wishId },
+      relations: {
+        owner: true,
+      },
     });
     if (!wish) {
       throw new NotFoundException();
@@ -133,7 +203,13 @@ export class WishesService {
         copied: wish.copied + 1,
       };
 
-      await this.updateOne(updatedWish, wishId.toString());
+      console.log(updatedWish);
+
+      await this.updateOne(
+        updatedWish,
+        updatedWish.id.toString(),
+        updatedWish.owner.id,
+      );
     }
 
     return {};

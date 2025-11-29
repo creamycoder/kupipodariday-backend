@@ -84,8 +84,12 @@ export class UsersService {
         });
 
         const userWishes = user.wishes.filter((wish) => {
+            const amounts = wish.offers.map((offer) => Number(offer.amount));
             delete wish.owner.password;
             delete wish.owner.email;
+            wish.raised = amounts.reduce(function (acc, val) {
+              return acc + val;
+            }, 0);
             wish.price = Number(wish.price);
             return wish;
         });
@@ -101,5 +105,9 @@ export class UsersService {
         }
         delete user[0].password;
         return user;
+    }
+
+    removeOne(id: number) {
+        return this.usersRepository.delete({ id });
     }
 }

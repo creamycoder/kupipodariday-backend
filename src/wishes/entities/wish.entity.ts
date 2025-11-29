@@ -64,6 +64,4 @@ export class Wish {
 
   @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[];
-
-
 }

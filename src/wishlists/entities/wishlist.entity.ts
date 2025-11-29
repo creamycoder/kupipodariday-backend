@@ -29,12 +29,6 @@ export class WishList {
   @Length(1, 250)
   name: string;
 
-  @Column({
-    type: 'varchar',
-    length: 1500,
-  })
-  description: string;
-
   @Column()
   image: string;
 
