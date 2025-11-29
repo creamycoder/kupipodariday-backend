@@ -2,6 +2,7 @@ import { Injectable, ConflictException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./entities/user.entity";
 import { FindOneOptions, Repository } from 'typeorm';
+import { FindUsersDto } from './dto/find-user.dto';
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from './dto/update-user.dto';
 import { HashService } from 'src/hash/hash.service';
@@ -90,5 +91,15 @@ export class UsersService {
         });
 
         return userWishes;
+    }
+
+    async findUserByEmailOrUserName(findUserDto: FindUsersDto) {
+        const { query } = findUserDto;
+        const user = await this.findMany(query);
+        if (!user) {
+            return;
+        }
+        delete user[0].password;
+        return user;
     }
 }

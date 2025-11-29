@@ -77,4 +77,23 @@ export class WishlistsService {
     });
     return updatedWishList;
   }
+
+  removeById(id: number) {
+    return this.wishListsRepository.delete({ id });
+  }
+
+  async delete(id: number) {
+    const wishList = await this.findOne({
+      where: { id: id },
+      relations: {
+        owner: true,
+        items: true,
+      },
+    });
+    if (!wishList) {
+      throw new NotFoundException();
+    }
+    await this.removeById(id);
+    return wishList;
+  }
 }

@@ -54,13 +54,7 @@ export class UsersController {
     @Post('find')
     @Header('Content-Type', 'application/json')
     async findUserByEmailOrUserName(@Body() findUserDto: FindUsersDto) {
-        const { query } = findUserDto;
-        const user = await this.usersService.findMany(query);
-        if (!user) {
-            return;
-        }
-        delete user[0].password;
-        return user;
+        return this.usersService.findUserByEmailOrUserName(findUserDto);
     }
 
     @Post()
