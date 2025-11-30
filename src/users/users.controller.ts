@@ -14,6 +14,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RequestWithUser } from 'src/utils/types';
+import { FindUserDto } from './dto/find-user.dto';
 
 @UseGuards(JwtGuard)
 @Controller('users')
@@ -51,8 +52,8 @@ export class UsersController {
   }
 
   @Post('find')
-  findMany(@Body('query') query: string): Promise<User[]> {
-    return this.usersService.findMany(query);
+  findMany(@Body() dto: FindUserDto): Promise<User[]> {
+    return this.usersService.findMany(dto.query);
   }
 
   @Get()

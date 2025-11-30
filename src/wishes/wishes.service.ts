@@ -217,10 +217,6 @@ export class WishesService {
       },
     });
 
-    if (isWishExists) {
-      throw new ForbiddenException('Данное желание у вас уже имеется');
-    }
-
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();

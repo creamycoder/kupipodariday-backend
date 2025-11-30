@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { UserAlreadyExistsException } from 'src/errors/user-exists.exception';
 import { HashService } from 'src/hash/hash.service';
 import { Wish } from 'src/wishes/entities/wish.entity';
+import { ILike } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -108,13 +109,13 @@ export class UsersService {
     return user.wishes;
   }
 
-  async findMany(query: any): Promise<User[] | undefined> {
+  async findMany(query: string): Promise<User[] | undefined> {
     const user = await this.usersRepository.find({
       where: [
         {
-          username: query,
+          username: ILike(`%${query}`),
         },
-        { email: query },
+        { email: ILike(`%${query}`) },
       ],
     });
 
