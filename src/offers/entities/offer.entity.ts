@@ -1,39 +1,38 @@
-import { User } from 'src/users/entities/user.entity';
-import { Wish } from 'src/wishes/entities/wish.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   Column,
+  CreateDateColumn,
   ManyToOne,
+  UpdateDateColumn,
 } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Wish } from 'src/wishes/entities/wish.entity';
 
 @Entity()
 export class Offer {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @UpdateDateColumn()
-    updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @ManyToOne(() => User, (user) => user.offers)
-    user: User;
+  @Column()
+  amount: number;
 
-    @ManyToOne(() => Wish, (wish) => wish.offers)
-    item: Wish;
+  @Column({
+    default: false,
+  })
+  hidden: boolean;
 
-    @Column({
-        type: 'numeric',
-        scale: 2,
-    })
-    amount: number;
+  @ManyToOne(() => User, (user) => user.offers)
+  user: User;
 
-    @Column({
-        default: false,
-    })
-    hidden: boolean;
+  @ManyToOne(() => Wish, (wish) => wish.offers, {
+    onDelete: 'CASCADE',
+  })
+  item: Wish;
 }

@@ -1,15 +1,17 @@
-import { IsUrl, Length } from 'class-validator';
-import { Offer } from 'src/offers/entities/offer.entity';
-import { User } from 'src/users/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
+  Column,
   CreateDateColumn,
   UpdateDateColumn,
-  Column,
   ManyToOne,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
+import { Min, Max, IsUrl } from 'class-validator';
+import { User } from 'src/users/entities/user.entity';
+import { Offer } from 'src/offers/entities/offer.entity';
+import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 
 @Entity()
 export class Wish {
@@ -22,46 +24,38 @@ export class Wish {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({
-    type: 'varchar',
-  })
-  @Length(1, 250)
+  @Column()
+  @Min(1)
+  @Max(250)
   name: string;
 
   @Column()
   link: string;
 
-  @Column()
   @IsUrl()
+  @Column()
   image: string;
 
-  @Column({
-    type: 'numeric',
-    scale: 2,
-  })
+  @Column()
   price: number;
 
-  @Column({
-    scale: 2,
-    default: 0,
-  })
+  @Column({ default: 0 })
   raised: number;
 
-  @Column({
-    scale: 0,
-    default: 0,
-  })
+  @Column()
+  @Min(1)
+  @Max(1024)
+  description: string;
+
+  @Column({ default: 0 })
   copied: number;
 
   @ManyToOne(() => User, (user) => user.wishes)
   owner: User;
 
-  @Column({
-    type: 'varchar',
-  })
-  @Length(1, 1024)
-  description: string;
-
   @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[];
+
+  @ManyToMany(() => Wishlist, (list) => list.items)
+  wishlists: Wishlist[];
 }

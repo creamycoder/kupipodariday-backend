@@ -1,45 +1,27 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+import { IsEmail, IsOptional, IsString, Length, IsUrl } from 'class-validator';
+import { CreateUserDto } from './create-user.dto';
 
-export class UpdateUserDto {
-  @IsString()
-  @MinLength(2, {
-    message: 'Имя пользователя не может быть короче 2-х символов',
-  })
-  @MaxLength(30, {
-    message: 'Имя пользователя не может быть длиннее 30 символов',
-  })
+export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
+  @IsString()
+  @Length(2, 30)
   username: string;
 
-  @IsString()
-  @MinLength(2, {
-    message: 'Описание профиля не может быть короче 2-х символов',
-  })
-  @MaxLength(200, {
-    message:'Описание профиля не может быть длиннее 200 символов',
-  })
   @IsOptional()
-  about?: string;
-
   @IsString()
+  @Length(2, 200)
+  about: string;
+
   @IsOptional()
   @IsUrl()
-  avatar?: string;
+  avatar: string;
 
-  @IsEmail()
   @IsOptional()
+  @IsEmail()
   email: string;
 
-  @IsString()
-  @IsNotEmpty()
   @IsOptional()
+  @IsString()
   password: string;
 }
